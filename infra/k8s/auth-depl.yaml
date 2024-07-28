@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: auth
-        image: ravenfall312/ticketing-auth
+        image: us.gcr.io/ticketing-dev-430721/auth
 ---
 apiVersion: v1
 kind: Service

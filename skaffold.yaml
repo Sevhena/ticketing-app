@@ -8,6 +8,8 @@ build:
   #   push: false
   googleCloudBuild:
     projectId: ticketing-dev-430721
+  tagPolicy:
+    sha256: {}
   artifacts:
     - image: us.gcr.io/ticketing-dev-430721/auth
       context: auth

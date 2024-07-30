@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import { User } from '../models/user';
 import { validateRequest } from '../middlewares/validate-request';
 import { BadRequestError } from '../errors/bad-request-error';
+import { currentUser } from '../middlewares/current-user';
 
 const router = express.Router();
 
@@ -41,7 +42,7 @@ router
         jwt: userJwt
       };
 
-      res.status(201).json({ status: 'success', user });
+      res.status(201).json({ status: 'success', currentUser: user });
     }
   );
 

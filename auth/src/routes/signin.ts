@@ -6,6 +6,7 @@ import { validateRequest } from '../middlewares/validate-request';
 import { BadRequestError } from '../errors/bad-request-error';
 import { Password } from '../utils/password';
 import { User } from '../models/user';
+import { currentUser } from '../middlewares/current-user';
 
 const router = express.Router();
 
@@ -48,7 +49,7 @@ router
         jwt: userJwt
       };
 
-      res.status(200).json({ status: 'Success', existingUser });
+      res.status(200).json({ status: 'Success', currentUser: existingUser });
     }
   );
 

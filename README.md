@@ -40,4 +40,4 @@ _This application was created in the context of learning microservices._
 
 ### Technologies used
 
-_Node.js, Express, Kubernetes, Docker, Google Cloud, Next.js, mongodb, Redis, NATS Streaming Server_
+_Node.js, Express, Kubernetes, Docker, Google Cloud, Next.js, mongodb, Redis, NATS Streaming Server, Jest_

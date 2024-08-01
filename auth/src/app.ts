@@ -16,6 +16,7 @@ app.use(json());
 app.use(
   cookieSession({
     signed: false,
+    sameSite: 'lax',
     secure: process.env.NODE_ENV !== 'test'
   })
 );

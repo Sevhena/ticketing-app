@@ -4,9 +4,16 @@ import {
   validateRequest,
   NotFoundError,
   requireAuth,
-  UnauthorizedError
+  UnauthorizedError,
+  Subjects,
+  EventStatus,
+  TicketUpdatedEvent
 } from '@svraven/tks-common';
+
 import { Ticket } from '../models/ticket';
+import mongoose from 'mongoose';
+import { TicketEvent } from '../models/internal-ticket-event';
+import TicketEventEmitter from '../events/events-emitter';
 
 const router = express.Router();
 
@@ -22,24 +29,49 @@ router
     ],
     validateRequest,
     async (req: Request, res: Response) => {
-      const ticket = await Ticket.findById(req.params.id);
+      const session = await mongoose.startSession();
 
-      if (!ticket) {
-        throw new NotFoundError();
+      try {
+        session.startTransaction();
+        const ticket = await Ticket.findById(req.params.id);
+
+        if (!ticket) {
+          throw new NotFoundError();
+        }
+
+        if (ticket.userId !== req.currentUser!.id) {
+          throw new UnauthorizedError();
+        }
+
+        ticket.set({
+          title: req.body.title,
+          price: req.body.price
+        });
+
+        await ticket.save();
+
+        const ticketEvent = TicketEvent.build<TicketUpdatedEvent>({
+          subject: Subjects.TicketUpdated,
+          status: EventStatus.PENDING,
+          data: {
+            title: ticket.title,
+            price: ticket.price,
+            userId: ticket.userId,
+            id: ticket.id,
+            version: ticket.version
+          }
+        });
+
+        ticketEvent.save();
+
+        await session.commitTransaction();
+        res.status(200).json(ticket);
+      } catch (err) {
+        await session.abortTransaction();
+        throw err;
+      } finally {
+        await session.endSession();
       }
-
-      if (ticket.userId !== req.currentUser!.id) {
-        throw new UnauthorizedError();
-      }
-
-      ticket.set({
-        title: req.body.title,
-        price: req.body.price
-      });
-
-      await ticket.save();
-
-      res.send(ticket);
     }
   );
 

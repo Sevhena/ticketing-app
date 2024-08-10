@@ -18,6 +18,7 @@ interface TicketDoc extends mongoose.Document {
   price: number;
   userId: string;
   createAt: Date;
+  version: number;
 }
 
 const ticketSchema = new mongoose.Schema(
@@ -33,6 +34,10 @@ const ticketSchema = new mongoose.Schema(
     userId: {
       type: String,
       required: true
+    },
+    version: {
+      type: Number,
+      default: 0
     }
   },
   {
@@ -49,6 +54,11 @@ const ticketSchema = new mongoose.Schema(
 ticketSchema.statics.build = (attrs: TicketAttrs) => {
   return new Ticket(attrs);
 };
+
+ticketSchema.pre('save', function (next) {
+  this.version = this.version + 1;
+  next();
+});
 
 const Ticket = mongoose.model<TicketDoc, TicketModel>('Ticket', ticketSchema);
 

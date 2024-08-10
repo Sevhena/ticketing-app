@@ -9,6 +9,8 @@ declare global {
   var createTicket: (title: string, price: number) => any;
 }
 
+jest.mock('../events/nats-wrapper');
+
 let mongo: MongoMemoryServer;
 beforeAll(async () => {
   process.env.JWT_KEY = 'asdf';
@@ -20,6 +22,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  jest.clearAllMocks();
   const collections = await mongoose.connection.db.collections();
 
   for (let collection of collections) {

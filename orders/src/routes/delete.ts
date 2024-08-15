@@ -1,7 +1,6 @@
 import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import {
-  EventStatus,
   NotFoundError,
   requireAuth,
   Subjects,
@@ -9,7 +8,8 @@ import {
 } from '@svraven/tks-common';
 
 import { Order, OrderStatus } from '../models/order';
-import { OrderEvent } from '../models/order-event';
+import { eventsEmitter } from '../events/events-emitter';
+import { createOrderEvent } from '../utils/create-order-event';
 
 const router = express.Router();
 
@@ -36,20 +36,11 @@ router
 
       await order.save();
 
-      const orderEvent = OrderEvent.build({
-        subject: Subjects.OrderCancelled,
-        status: EventStatus.PENDING,
-        data: {
-          id: order.id,
-          userId: order.userId,
-          orderStatus: order.orderStatus,
-          expiresAt: order.expiresAt.toISOString(),
-          version: order.version,
-          ticket: order.ticket
-        }
-      });
+      const orderEvent = createOrderEvent(order, Subjects.OrderCancelled);
 
       await orderEvent.save();
+
+      eventsEmitter.emitOrderEvent();
 
       await session.commitTransaction();
     } catch (err) {

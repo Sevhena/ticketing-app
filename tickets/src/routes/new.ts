@@ -4,13 +4,14 @@ import {
   EventStatus,
   requireAuth,
   Subjects,
-  TicketCreatedEvent,
   validateRequest
 } from '@svraven/tks-common';
 
 import { Ticket } from '../models/ticket';
 import mongoose from 'mongoose';
 import { TicketEvent } from '../models/internal-ticket-event';
+import { eventsEmitter } from '../events/events-emitter';
+import { createTicketEvent } from '../utils/create-ticket-event';
 
 const router = express.Router();
 
@@ -40,19 +41,11 @@ router
 
         await ticket.save();
 
-        const ticketEvent = TicketEvent.build<TicketCreatedEvent>({
-          subject: Subjects.TicketCreated,
-          status: EventStatus.PENDING,
-          data: {
-            title: ticket.title,
-            price: ticket.price,
-            userId: ticket.userId,
-            id: ticket.id,
-            version: ticket.version
-          }
-        });
+        const ticketEvent = createTicketEvent(Subjects.TicketCreated, ticket);
 
         await ticketEvent.save();
+
+        eventsEmitter.emitTicketEvent();
 
         await session.commitTransaction();
         res.status(201).json(ticket);

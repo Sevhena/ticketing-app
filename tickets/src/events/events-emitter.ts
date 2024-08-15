@@ -6,4 +6,4 @@ class TicketEventEmitter extends EventEmitter {
   }
 }
 
-export default new TicketEventEmitter();
+export const eventsEmitter = new TicketEventEmitter();

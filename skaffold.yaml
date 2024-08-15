@@ -27,6 +27,14 @@ build:
             dest: .
       docker:
         dockerfile: Dockerfile
+    - image: us.gcr.io/ticketing-dev-430721/orders
+      context: orders
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
+      docker:
+        dockerfile: Dockerfile
     - image: us.gcr.io/ticketing-dev-430721/client
       context: client
       sync:

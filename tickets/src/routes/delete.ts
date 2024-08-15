@@ -4,14 +4,13 @@ import {
   NotFoundError,
   requireAuth,
   Subjects,
-  TicketDeletedEvent,
   UnauthorizedError
 } from '@svraven/tks-common';
 
 import { Ticket } from '../models/ticket';
 import mongoose from 'mongoose';
-import TicketEventEmitter from '../events/events-emitter';
 import { TicketEvent } from '../models/internal-ticket-event';
+import { createTicketEvent } from '../utils/create-ticket-event';
 
 const router = express.Router();
 
@@ -33,16 +32,10 @@ router
     try {
       session.startTransaction();
 
-      const ticketEvent = TicketEvent.build<TicketDeletedEvent>({
-        subject: Subjects.TicketDeleted,
-        status: EventStatus.PENDING,
-        data: {
-          id: ticket.id,
-          version: ticket.version
-        }
-      });
-
       await ticket.deleteOne();
+
+      const ticketEvent = createTicketEvent(Subjects.TicketDeleted, ticket);
+
       await ticketEvent.save();
 
       await session.commitTransaction();

@@ -6,9 +6,13 @@ import { natsWrapper } from './events/nats-wrapper';
 import { app } from './app';
 import { TicketEventHandler } from './events/event-handler';
 import { TicketEvent } from './models/internal-ticket-event';
-import ticketEventEmitter from './events/events-emitter';
+import { eventsEmitter } from './events/events-emitter';
+import {
+  OrderCancelledListener,
+  OrderCreatedListener
+} from './events/listeners';
 
-const start = async () => {
+(async () => {
   if (!process.env.JWT_KEY) {
     throw new Error('JWT_KEY must be defined');
   }
@@ -27,6 +31,9 @@ const start = async () => {
   if (!process.env.NATS_URL) {
     throw new Error('NATS_URL must be defined');
   }
+  if (!process.env.QUEUE_GROUP_NAME) {
+    throw new Error('QUEUE_GROUP_NAME must be defined');
+  }
   try {
     await natsWrapper.connect(
       process.env.NATS_CLUSTER_ID,
@@ -41,14 +48,17 @@ const start = async () => {
     process.on('SIGINT', () => natsWrapper.client.close());
     process.on('SIGTERM', () => natsWrapper.client.close());
 
+    new OrderCreatedListener(natsWrapper.client).listen();
+    new OrderCancelledListener(natsWrapper.client).listen();
+
     const ticketEventHandler = new TicketEventHandler(TicketEvent);
 
     // Crons for Events
-    const cronjob = cron.schedule('*/2 * * * *', async () => {
+    const cronjob = cron.schedule('*/30 * * * * *', async () => {
       await ticketEventHandler.handle();
     });
     // Attach Listener for InternalEvents
-    ticketEventEmitter.on(process.env.NATS_EVENT, async () => {
+    eventsEmitter.on(process.env.NATS_EVENT, async () => {
       try {
         cronjob.stop();
         await ticketEventHandler.handle();
@@ -66,9 +76,8 @@ const start = async () => {
     console.error(err);
   }
 
+  console.log('Starting up!');
   app.listen(3000, () => {
     console.log('Listening on port 3000...');
   });
-};
-
-start();
+})();

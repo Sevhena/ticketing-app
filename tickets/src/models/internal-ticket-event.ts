@@ -1,29 +1,16 @@
-import { Schema, model, Model } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import {
-  Event,
   InternalEventDoc,
   InternalEventModel,
-  EventData,
   Subjects,
-  EventStatus
+  EventStatus,
+  TicketEvent as ITicketEvent
 } from '@svraven/tks-common';
 
-import TicketEventEmitter from '../events/events-emitter';
+type TicketEventDoc = InternalEventDoc<ITicketEvent>;
+type TicketEventModel = InternalEventModel<ITicketEvent, TicketEventDoc>;
 
-// An interface that describes the properties a InternalEvent Document has
-export interface TicketEventDoc extends InternalEventDoc {
-  id: string;
-  subject: Subjects;
-  data: EventData;
-  createdAt: Date;
-  updatedAt: Date;
-  status: EventStatus;
-}
-
-const internalTicketEventSchema = new Schema<
-  TicketEventDoc,
-  InternalEventModel
->(
+const ticketEventSchema = new Schema<TicketEventDoc, TicketEventModel>(
   {
     subject: {
       type: String,
@@ -49,17 +36,14 @@ const internalTicketEventSchema = new Schema<
   }
 );
 
-internalTicketEventSchema.static('build', <T extends Event>(attrs: T) => {
+ticketEventSchema.static('build', (attrs: ITicketEvent) => {
   return new TicketEvent(attrs);
 });
 
-const TicketEvent = model<TicketEventDoc, InternalEventModel>(
+const TicketEvent = model<TicketEventDoc, TicketEventModel>(
   'TicketEvent',
-  internalTicketEventSchema
+  ticketEventSchema
 );
 
-internalTicketEventSchema.pre('save', () => {
-  TicketEventEmitter.emitTicketEvent();
-});
-
+export { TicketEventDoc };
 export { TicketEvent };

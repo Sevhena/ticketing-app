@@ -9,6 +9,7 @@ declare global {
   var createTicket: (title: string, price: number) => any;
 }
 
+jest.mock('../events/events-emitter');
 jest.mock('../events/nats-wrapper');
 
 let mongo: MongoMemoryServer;

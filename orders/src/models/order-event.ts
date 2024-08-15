@@ -7,8 +7,6 @@ import {
   OrderEvent as IOrderEvent
 } from '@svraven/tks-common';
 
-import orderEventEmitter from '../events/events-emitter';
-
 type OrderEventDoc = InternalEventDoc<IOrderEvent>;
 type OrderEventModel = InternalEventModel<IOrderEvent, OrderEventDoc>;
 
@@ -46,10 +44,6 @@ const OrderEvent = model<OrderEventDoc, OrderEventModel>(
   'OrderEvent',
   orderEventSchema
 );
-
-orderEventSchema.pre('save', () => {
-  orderEventEmitter.emitOrderEvent();
-});
 
 export { OrderEventDoc };
 export { OrderEvent };

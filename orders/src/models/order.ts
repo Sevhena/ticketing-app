@@ -17,7 +17,7 @@ interface OrderModel extends Model<OrderDoc> {
 }
 
 // An interface that describes the properties a order Document has
-interface OrderDoc extends Document {
+export interface OrderDoc extends Document {
   id: string;
   title: any;
   price: any;
@@ -48,16 +48,10 @@ const orderSchema = new Schema<OrderDoc, OrderModel>(
       type: Schema.Types.ObjectId,
       ref: 'Ticket',
       required: true
-    },
-    version: {
-      type: Number,
-      required: true,
-      default: 0
     }
   },
   {
     toJSON: {
-      versionKey: false,
       transform(doc, ret) {
         ret.id = ret._id;
         delete ret._id;
@@ -65,6 +59,8 @@ const orderSchema = new Schema<OrderDoc, OrderModel>(
     }
   }
 );
+
+orderSchema.set('versionKey', 'version');
 
 orderSchema.statics.build = (attrs: OrderAttrs): OrderDoc => {
   return new Order(attrs);

@@ -6,4 +6,4 @@ class OrderEventEmitter extends EventEmitter {
   }
 }
 
-export default new OrderEventEmitter();
+export const eventsEmitter = new OrderEventEmitter();

@@ -8,6 +8,7 @@ declare global {
   var createTicket: () => Promise<TicketDoc>;
 }
 
+jest.mock('../events/events-emitter');
 jest.mock('../events/nats-wrapper');
 
 let mongo: MongoMemoryServer;
@@ -38,8 +39,10 @@ afterAll(async () => {
 
 global.createTicket = async () => {
   const ticket = Ticket.build({
+    id: new mongoose.Types.ObjectId().toHexString(),
     title: 'concert',
-    price: 20
+    price: 20,
+    version: 2
   });
 
   await ticket.save();

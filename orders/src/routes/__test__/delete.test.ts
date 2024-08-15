@@ -1,8 +1,9 @@
 import request from 'supertest';
 import { app } from '../../app';
 import { OrderStatus } from '@svraven/tks-common';
+import { eventsEmitter } from '../../events/events-emitter';
 
-it('marks an order as cancelled', async () => {
+it('marks an order as cancelled and publishes it', async () => {
   const ticket = await global.createTicket();
 
   const cookie = global.signin();
@@ -25,4 +26,5 @@ it('marks an order as cancelled', async () => {
     .expect(200);
 
   expect(updatedOrder.orderStatus).toEqual(OrderStatus.Cancelled);
+  expect(eventsEmitter.emitOrderEvent).toHaveBeenCalled();
 });

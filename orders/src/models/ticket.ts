@@ -3,13 +3,19 @@ import { Order, OrderStatus } from './order';
 
 // An interface that describes the properties required to create a new ticket
 interface TicketAttrs {
+  id: string;
   title: string;
   price: number;
+  version: number;
 }
 
 // An interface that describes the properties a Ticket Model has
 interface TicketModel extends Model<TicketDoc, {}, TicketMethods> {
   build(attrs: TicketAttrs): TicketDoc;
+  findCurrent(event: {
+    id: string;
+    version: number;
+  }): Promise<TicketDoc | null>;
 }
 
 // An interface that describes the properties a ticket Document has
@@ -34,10 +40,6 @@ const ticketSchema = new Schema<TicketDoc, TicketModel, TicketMethods>(
       type: Number,
       required: true,
       min: 0
-    },
-    version: {
-      type: Number,
-      default: 0
     }
   },
   {
@@ -51,8 +53,21 @@ const ticketSchema = new Schema<TicketDoc, TicketModel, TicketMethods>(
   }
 );
 
+ticketSchema.set('versionKey', 'version');
+
 ticketSchema.statics.build = (attrs: TicketAttrs) => {
-  return new Ticket(attrs);
+  return new Ticket({
+    _id: attrs.id,
+    title: attrs.title,
+    price: attrs.price
+  });
+};
+
+ticketSchema.statics.findCurrent = (event: { id: string; version: number }) => {
+  return Ticket.findOne({
+    _id: event.id,
+    version: event.version - 1
+  });
 };
 
 // 1) Run query to look at all orders.
@@ -67,11 +82,6 @@ ticketSchema.methods.isReserved = async function (): Promise<Boolean> {
 
   return !!existingOrder;
 };
-
-ticketSchema.pre('save', function (next) {
-  this.version = this.version + 1;
-  next();
-});
 
 const Ticket = model<TicketDoc, TicketModel>('Ticket', ticketSchema);
 

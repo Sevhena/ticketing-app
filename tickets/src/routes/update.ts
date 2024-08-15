@@ -6,14 +6,13 @@ import {
   requireAuth,
   UnauthorizedError,
   Subjects,
-  EventStatus,
-  TicketUpdatedEvent
+  BadRequestError
 } from '@svraven/tks-common';
 
 import { Ticket } from '../models/ticket';
 import mongoose from 'mongoose';
-import { TicketEvent } from '../models/internal-ticket-event';
-import TicketEventEmitter from '../events/events-emitter';
+import { eventsEmitter } from '../events/events-emitter';
+import { createTicketEvent } from '../utils/create-ticket-event';
 
 const router = express.Router();
 
@@ -43,6 +42,10 @@ router
           throw new UnauthorizedError();
         }
 
+        if (ticket.orderId) {
+          throw new BadRequestError('Cannot edit a reserved ticket');
+        }
+
         ticket.set({
           title: req.body.title,
           price: req.body.price
@@ -50,17 +53,9 @@ router
 
         await ticket.save();
 
-        const ticketEvent = TicketEvent.build<TicketUpdatedEvent>({
-          subject: Subjects.TicketUpdated,
-          status: EventStatus.PENDING,
-          data: {
-            title: ticket.title,
-            price: ticket.price,
-            userId: ticket.userId,
-            id: ticket.id,
-            version: ticket.version
-          }
-        });
+        eventsEmitter.emitTicketEvent();
+
+        const ticketEvent = createTicketEvent(Subjects.TicketUpdated, ticket);
 
         ticketEvent.save();
 

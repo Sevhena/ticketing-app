@@ -2,7 +2,6 @@ import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
 import {
   BadRequestError,
-  EventStatus,
   NotFoundError,
   requireAuth,
   Subjects,
@@ -12,7 +11,8 @@ import {
 import { Ticket } from '../models/ticket';
 import { Order, OrderStatus } from '../models/order';
 import mongoose from 'mongoose';
-import { OrderEvent } from '../models/order-event';
+import { eventsEmitter } from '../events/events-emitter';
+import { createOrderEvent } from '../utils/create-order-event';
 
 const router = express.Router();
 
@@ -62,20 +62,11 @@ router.route('/api/orders').post(
 
       await order.save();
 
-      const orderEvent = OrderEvent.build({
-        subject: Subjects.OrderCreated,
-        status: EventStatus.PENDING,
-        data: {
-          id: order.id,
-          userId: order.userId,
-          orderStatus: order.orderStatus,
-          expiresAt: order.expiresAt.toISOString(),
-          version: order.version,
-          ticket
-        }
-      });
+      const orderEvent = createOrderEvent(order, Subjects.OrderCreated);
 
       await orderEvent.save();
+
+      eventsEmitter.emitOrderEvent();
 
       await session.commitTransaction();
     } catch (err) {

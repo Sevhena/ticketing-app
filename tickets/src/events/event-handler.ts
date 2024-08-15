@@ -1,12 +1,20 @@
-import { AbstractEventHandler, Subjects } from '@svraven/tks-common';
+import {
+  AbstractEventHandler,
+  Subjects,
+  TicketEvent
+} from '@svraven/tks-common';
 import {
   TicketCreatedPublisher,
   TicketUpdatedPublisher,
   TicketDeletedPublisher
 } from './publishers';
 import { natsWrapper } from './nats-wrapper';
+import { TicketEventDoc } from '../models/internal-ticket-event';
 
-export class TicketEventHandler extends AbstractEventHandler {
+export class TicketEventHandler extends AbstractEventHandler<
+  TicketEvent,
+  TicketEventDoc
+> {
   selectPublisher(subject: Subjects) {
     switch (subject) {
       case Subjects.TicketCreated:

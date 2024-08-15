@@ -3,6 +3,7 @@ import request from 'supertest';
 import { app } from '../../app';
 import { OrderStatus } from '@svraven/tks-common';
 import { Order } from '../../models/order';
+import { eventsEmitter } from '../../events/events-emitter';
 
 it('return an error if the ticket does not exist', async () => {
   const ticketId = new mongoose.Types.ObjectId();
@@ -33,7 +34,7 @@ it('return an error if the ticket is already reserved', async () => {
     .expect(400);
 });
 
-it('reserves a ticket', async () => {
+it('reserves a ticket and publishes an event', async () => {
   const ticket = await global.createTicket();
 
   await request(app)
@@ -41,4 +42,6 @@ it('reserves a ticket', async () => {
     .set('Cookie', global.signin())
     .send({ ticketId: ticket.id })
     .expect(201);
+
+  expect(eventsEmitter.emitOrderEvent).toHaveBeenCalled();
 });

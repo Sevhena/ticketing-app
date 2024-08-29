@@ -5,7 +5,7 @@ import cron from 'node-cron';
 import { natsWrapper } from './events/nats-wrapper';
 import { app } from './app';
 import { TicketEventHandler } from './events/event-handler';
-import { TicketEvent } from './models/internal-ticket-event';
+import { TicketEvent } from './models/ticket-event';
 import { eventsEmitter } from './events/events-emitter';
 import {
   OrderCancelledListener,
@@ -70,13 +70,11 @@ import {
     });
 
     await mongoose.connect(process.env.MONGO_URI);
-    mongoose.set('transactionAsyncLocalStorage', true);
     console.log('Connected to MongoDB');
   } catch (err) {
     console.error(err);
   }
 
-  console.log('Starting up!');
   app.listen(3000, () => {
     console.log('Listening on port 3000...');
   });

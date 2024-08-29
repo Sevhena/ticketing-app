@@ -8,7 +8,11 @@ import { OrderEventHandler } from './events/event-handler';
 import { OrderEvent } from './models/order-event';
 import { eventsEmitter } from './events/events-emitter';
 import {
+  ExpirationCompleteListener,
+  AwaitingPaymentListener,
+  PaymentCreatedListener,
   TicketCreatedListener,
+  TicketDeleteListener,
   TicketUpdatedListener
 } from './events/listeners';
 
@@ -50,6 +54,10 @@ import {
 
     new TicketCreatedListener(natsWrapper.client).listen();
     new TicketUpdatedListener(natsWrapper.client).listen();
+    new TicketDeleteListener(natsWrapper.client).listen();
+    new ExpirationCompleteListener(natsWrapper.client).listen();
+    new AwaitingPaymentListener(natsWrapper.client).listen();
+    new PaymentCreatedListener(natsWrapper.client).listen();
 
     const orderEventHandler = new OrderEventHandler(OrderEvent);
 

@@ -17,7 +17,7 @@ it('returns a 401 if the user is not authenticated', async () => {
 });
 
 it('returns a 401 if the user does not own the ticket', async () => {
-  const response = await global.createTicket('khfjssks', 20);
+  const response = await global.createTicket(global.signin(), 'khfjssks', 20);
 
   await request(app)
     .delete(`/api/tickets/${response.body.id}`)
@@ -26,7 +26,7 @@ it('returns a 401 if the user does not own the ticket', async () => {
     .expect(401);
 });
 
-it('deletes the ticket when provided valid inputs', async () => {
+it('succesfully deletes ticket and hides it from searching', async () => {
   const cookie = global.signin();
 
   const response = await request(app)

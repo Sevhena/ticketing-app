@@ -1,15 +1,14 @@
 import express, { Request, Response } from 'express';
 import {
-  EventStatus,
+  BadRequestError,
   NotFoundError,
   requireAuth,
   Subjects,
   UnauthorizedError
 } from '@svraven/tks-common';
+import mongoose from 'mongoose';
 
 import { Ticket } from '../models/ticket';
-import mongoose from 'mongoose';
-import { TicketEvent } from '../models/internal-ticket-event';
 import { createTicketEvent } from '../utils/create-ticket-event';
 
 const router = express.Router();
@@ -27,16 +26,18 @@ router
       throw new UnauthorizedError();
     }
 
+    if (ticket.orderId) {
+      throw new BadRequestError('Cannot delete a reserved ticket');
+    }
+
     const session = await mongoose.startSession();
 
     try {
       session.startTransaction();
 
-      await ticket.deleteOne();
+      await ticket.set({ active: false }).save();
 
-      const ticketEvent = createTicketEvent(Subjects.TicketDeleted, ticket);
-
-      await ticketEvent.save();
+      await createTicketEvent(Subjects.TicketDeleted, ticket).save();
 
       await session.commitTransaction();
     } catch (err) {

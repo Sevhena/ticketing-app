@@ -2,7 +2,7 @@ import EventEmitter from 'events';
 
 class TicketEventEmitter extends EventEmitter {
   emitTicketEvent() {
-    this.emit('newTicketEvent');
+    this.emit(process.env.NATS_EVENT!);
   }
 }
 

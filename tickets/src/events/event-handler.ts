@@ -9,7 +9,7 @@ import {
   TicketDeletedPublisher
 } from './publishers';
 import { natsWrapper } from './nats-wrapper';
-import { TicketEventDoc } from '../models/internal-ticket-event';
+import { TicketEventDoc } from '../models/ticket-event';
 
 export class TicketEventHandler extends AbstractEventHandler<
   TicketEvent,

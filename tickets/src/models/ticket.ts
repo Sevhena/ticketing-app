@@ -1,4 +1,4 @@
-import { Document, Schema, Model, model } from 'mongoose';
+import { Document, Schema, Model, model, Query } from 'mongoose';
 
 // An interface that describes the properties required to create a new ticket
 interface TicketAttrs {
@@ -20,6 +20,7 @@ export interface TicketDoc extends Document {
   userId: string;
   orderId?: string;
   version: number;
+  active: boolean;
 }
 
 const ticketSchema = new Schema<TicketDoc, TicketModel>(
@@ -38,9 +39,14 @@ const ticketSchema = new Schema<TicketDoc, TicketModel>(
     },
     orderId: {
       type: String
+    },
+    active: {
+      type: Boolean,
+      default: true
     }
   },
   {
+    optimisticConcurrency: true,
     toJSON: {
       transform(doc, ret) {
         ret.id = ret._id;
@@ -56,8 +62,10 @@ ticketSchema.statics.build = (attrs: TicketAttrs) => {
   return new Ticket(attrs);
 };
 
-ticketSchema.pre('save', function (next) {
-  this.version = this.version + 1;
+ticketSchema.pre(/^find/, function (next) {
+  (this as Query<any, any, {}, any, 'find', Record<string, never>>).find({
+    active: { $ne: false }
+  });
   next();
 });
 

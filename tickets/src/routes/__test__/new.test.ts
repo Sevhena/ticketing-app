@@ -63,7 +63,11 @@ it('creates a ticket with valid inputs', async () => {
   let tickets = await Ticket.find({});
   expect(tickets.length).toEqual(0);
 
-  const response: Response = await global.createTicket('hksbjcsnvv', 15);
+  const response: Response = await global.createTicket(
+    global.signin(),
+    'hksbjcsnvv',
+    15
+  );
 
   expect(response.status).toEqual(201);
 
@@ -75,7 +79,11 @@ it('publishes an event', async () => {
   let tickets = await Ticket.find({});
   expect(tickets.length).toEqual(0);
 
-  const response: Response = await global.createTicket('hksbjcsnvv', 15);
+  const response: Response = await global.createTicket(
+    global.signin(),
+    'hksbjcsnvv',
+    15
+  );
 
   expect(response.status).toEqual(201);
 });

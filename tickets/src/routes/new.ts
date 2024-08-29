@@ -9,7 +9,7 @@ import {
 
 import { Ticket } from '../models/ticket';
 import mongoose from 'mongoose';
-import { TicketEvent } from '../models/internal-ticket-event';
+import { TicketEvent } from '../models/ticket-event';
 import { eventsEmitter } from '../events/events-emitter';
 import { createTicketEvent } from '../utils/create-ticket-event';
 

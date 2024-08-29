@@ -2,7 +2,7 @@ import EventEmitter from 'events';
 
 class OrderEventEmitter extends EventEmitter {
   emitOrderEvent() {
-    this.emit('newOrderEvent');
+    this.emit(process.env.NATS_EVENT!);
   }
 }
 

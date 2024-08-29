@@ -1,4 +1,4 @@
-import { Schema, Model, model, Document } from 'mongoose';
+import { Schema, Model, model, Document, Query } from 'mongoose';
 import { Order, OrderStatus } from './order';
 
 // An interface that describes the properties required to create a new ticket
@@ -20,10 +20,10 @@ interface TicketModel extends Model<TicketDoc, {}, TicketMethods> {
 
 // An interface that describes the properties a ticket Document has
 export interface TicketDoc extends Document {
-  id: string;
   title: string;
   price: number;
   version: number;
+  active: boolean;
 }
 
 interface TicketMethods {
@@ -40,9 +40,19 @@ const ticketSchema = new Schema<TicketDoc, TicketModel, TicketMethods>(
       type: Number,
       required: true,
       min: 0
+    },
+    active: {
+      type: Boolean,
+      default: true
     }
   },
   {
+    toObject: {
+      transform(doc, ret) {
+        ret.id = ret._id;
+        delete ret._id;
+      }
+    },
     toJSON: {
       versionKey: false,
       transform(doc, ret) {
@@ -75,13 +85,20 @@ ticketSchema.statics.findCurrent = (event: { id: string; version: number }) => {
 ticketSchema.methods.isReserved = async function (): Promise<Boolean> {
   const existingOrder = await Order.findOne({
     ticket: this,
-    status: {
+    orderStatus: {
       $ne: OrderStatus.Cancelled
     }
   });
 
   return !!existingOrder;
 };
+
+ticketSchema.pre(/^find/, function (next) {
+  (this as Query<any, any, {}, any, 'find', Record<string, never>>).find({
+    active: { $ne: false }
+  });
+  next();
+});
 
 const Ticket = model<TicketDoc, TicketModel>('Ticket', ticketSchema);
 

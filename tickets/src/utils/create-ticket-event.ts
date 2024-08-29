@@ -1,5 +1,5 @@
 import { EventStatus, Subjects } from '@svraven/tks-common';
-import { TicketEvent } from '../models/internal-ticket-event';
+import { TicketEvent } from '../models/ticket-event';
 import { TicketDoc } from '../models/ticket';
 
 export const createTicketEvent = (subject: Subjects, ticket: TicketDoc) => {

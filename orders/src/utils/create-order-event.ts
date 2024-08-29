@@ -15,7 +15,7 @@ export const createOrderEvent = (
       orderStatus: order.orderStatus,
       expiresAt: order.expiresAt.toISOString(),
       version: order.version,
-      ticket: order.ticket
+      ticket: order.ticket.toObject()
     }
   });
 };

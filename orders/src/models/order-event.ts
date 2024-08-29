@@ -25,6 +25,13 @@ const orderEventSchema = new Schema<OrderEventDoc, OrderEventModel>(
     }
   },
   {
+    toObject: {
+      versionKey: false,
+      transform(doc, ret) {
+        ret.id = ret._id;
+        delete ret._id;
+      }
+    },
     toJSON: {
       versionKey: false,
       transform(doc, ret) {

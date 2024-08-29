@@ -16,7 +16,7 @@ import { createOrderEvent } from '../utils/create-order-event';
 
 const router = express.Router();
 
-const EXPIRATION_WINDOW_SECONDS = 15 * 60;
+const EXPIRATION_WINDOW_SECONDS = 1 * 60;
 
 router.route('/api/orders').post(
   requireAuth,
@@ -34,7 +34,7 @@ router.route('/api/orders').post(
 
     const ticket = await Ticket.findById(ticketId);
 
-    if (!ticket) {
+    if (!ticket || !ticket.active) {
       throw new NotFoundError();
     }
 

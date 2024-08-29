@@ -51,6 +51,7 @@ const orderSchema = new Schema<OrderDoc, OrderModel>(
     }
   },
   {
+    optimisticConcurrency: true,
     toJSON: {
       transform(doc, ret) {
         ret.id = ret._id;
@@ -65,11 +66,6 @@ orderSchema.set('versionKey', 'version');
 orderSchema.statics.build = (attrs: OrderAttrs): OrderDoc => {
   return new Order(attrs);
 };
-
-orderSchema.pre('save', function (next) {
-  this.version = this.version + 1;
-  next();
-});
 
 const Order = model<OrderDoc, OrderModel>('Order', orderSchema);
 

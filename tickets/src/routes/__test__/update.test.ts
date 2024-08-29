@@ -21,7 +21,7 @@ it('returns a 401 if the user is not authenticated', async () => {
 });
 
 it('returns a 401 if the user does not own the ticket', async () => {
-  const response = await global.createTicket('khfjssks', 20);
+  const response = await global.createTicket(global.signin(), 'khfjssks', 20);
 
   await request(app)
     .put(`/api/tickets/${response.body.id}`)
@@ -33,13 +33,7 @@ it('returns a 401 if the user does not own the ticket', async () => {
 it('returns a 400 if the user provides an invalid title or price', async () => {
   const cookie = global.signin();
 
-  const response = await request(app)
-    .post('/api/tickets')
-    .set('Cookie', cookie)
-    .send({
-      title: 'bjfnlnvwfv',
-      price: 20
-    });
+  const response = await global.createTicket(cookie, 'khfjssks', 20);
 
   await request(app)
     .put(`/api/tickets/${response.body.id}`)
@@ -57,13 +51,7 @@ it('returns a 400 if the user provides an invalid title or price', async () => {
 it('rejects updates if the ticket is reserved', async () => {
   const cookie = global.signin();
 
-  const response = await request(app)
-    .post('/api/tickets')
-    .set('Cookie', cookie)
-    .send({
-      title: 'bjfnlnvwfv',
-      price: 20
-    });
+  const response = await global.createTicket(cookie, 'khfjssks', 20);
 
   const ticket = await Ticket.findById(response.body.id);
   await ticket!
@@ -80,13 +68,7 @@ it('rejects updates if the ticket is reserved', async () => {
 it('updates the ticket when provided valid inputs', async () => {
   const cookie = global.signin();
 
-  const response = await request(app)
-    .post('/api/tickets')
-    .set('Cookie', cookie)
-    .send({
-      title: 'bjfnlnvwfv',
-      price: 20
-    });
+  const response = await global.createTicket(cookie, 'khfjssks', 20);
 
   await request(app)
     .put(`/api/tickets/${response.body.id}`)

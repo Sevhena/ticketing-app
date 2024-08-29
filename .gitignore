@@ -1,4 +1,5 @@
 node_modules
 nats-test
+*.env
 
 save-gcloud-credits.txt

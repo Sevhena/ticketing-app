@@ -10,7 +10,7 @@ import { Ticket } from '../../models/ticket';
 import { OrderCancelledListener } from '../listeners';
 import { natsWrapper } from '../nats-wrapper';
 import mongoose from 'mongoose';
-import { TicketEvent } from '../../models/internal-ticket-event';
+import { TicketEvent } from '../../models/ticket-event';
 import { eventsEmitter } from '../events-emitter';
 
 const setup = async () => {
@@ -37,6 +37,7 @@ const setup = async () => {
     expiresAt: 'bfkjdf',
     ticket: {
       id: ticket.id,
+      title: ticket.title,
       price: ticket.price
     }
   };

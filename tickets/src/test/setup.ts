@@ -6,11 +6,12 @@ import jwt from 'jsonwebtoken';
 
 declare global {
   var signin: () => string[];
-  var createTicket: (title: string, price: number) => any;
+  var createTicket: (cookie: string[], title: string, price: number) => any;
 }
 
 jest.mock('../events/events-emitter');
 jest.mock('../events/nats-wrapper');
+jest.setTimeout(10 * 1000);
 
 let mongo: MongoMemoryServer;
 beforeAll(async () => {
@@ -24,7 +25,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   jest.clearAllMocks();
-  const collections = await mongoose.connection.db.collections();
+  const collections = await mongoose.connection.db!.collections();
 
   for (let collection of collections) {
     await collection.deleteMany({});
@@ -38,8 +39,8 @@ afterAll(async () => {
   await mongoose.connection.close();
 });
 
-global.createTicket = (title, price) => {
-  return request(app).post('/api/tickets').set('Cookie', global.signin()).send({
+global.createTicket = (cookie, title, price) => {
+  return request(app).post('/api/tickets').set('Cookie', cookie).send({
     title,
     price
   });
